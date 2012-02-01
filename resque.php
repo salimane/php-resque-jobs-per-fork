@@ -15,6 +15,13 @@ if($APP_INCLUDE) {
 
 require_once 'lib/Resque.php';
 require_once 'lib/Resque/Worker.php';
+require_once 'lib/Resque/WorkerJobsPerFork.php';
+
+$jobs_per_fork = 1;
+$JOBS_PER_FORK = getenv('JOBS_PER_FORK');
+if(!empty($JOBS_PER_FORK)) {
+  $jobs_per_fork = $JOBS_PER_FORK;
+}
 
 $REDIS_BACKEND = getenv('REDIS_BACKEND');
 if(!empty($REDIS_BACKEND)) {
@@ -53,7 +60,7 @@ if($count > 1) {
 		// Child, start the worker
 		else if(!$pid) {
 			$queues = explode(',', $QUEUE);
-			$worker = new Resque_Worker($queues);
+			$worker = new Resque_WorkerJobsPerFork($queues, $jobs_per_fork);
 			$worker->logLevel = $logLevel;
 			fwrite(STDOUT, '*** Starting worker '.$worker."\n");
 			$worker->work($interval);
@@ -64,7 +71,7 @@ if($count > 1) {
 // Start a single worker
 else {
 	$queues = explode(',', $QUEUE);
-	$worker = new Resque_Worker($queues);
+	$worker = new Resque_WorkerJobsPerFork($queues, $jobs_per_fork);
 	$worker->logLevel = $logLevel;
 
 	$PIDFILE = getenv('PIDFILE');
@@ -76,4 +83,3 @@ else {
 	fwrite(STDOUT, '*** Starting worker '.$worker."\n");
 	$worker->work($interval);
 }
-?>
