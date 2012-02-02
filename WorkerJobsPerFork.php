@@ -2,6 +2,8 @@
 /**
  * Resque worker that handles multiples jobs per fork when working.
  * it extends Resque_Worker original class.
+ * @author		Salimane Adjao Moustapha <me@salimane.com>
+ * @copyleft	(c) 2012 Salimane Adjao Moustapha
  */
 class Resque_WorkerJobsPerFork extends Resque_Worker {
   /**
