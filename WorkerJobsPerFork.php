@@ -38,9 +38,6 @@ class Resque_WorkerJobsPerFork extends Resque_Worker {
     $this->log("Starting PerformJobsPerFork... ");
     $jobs_performed = 0;
     while ($jobs_performed < self::$jobs_per_fork) {
-      if($this->shutdown) {
-        break;
-      }
       if ($jobs_performed == 0) {
         parent::perform($job);
       }
