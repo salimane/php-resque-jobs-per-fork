@@ -38,19 +38,23 @@ class Resque_WorkerJobsPerFork extends Resque_Worker {
     $this->log("Starting PerformJobsPerFork... ");
     $jobs_performed = 0;
     while ($jobs_performed < self::$jobs_per_fork) {
-      if ($jobs_performed == 0) {
+      if ($jobs_performed == 0 && $job) {
         parent::perform($job);
-      }
-      elseif ($job = $this->reserve()) {
-        $this->log('got ' . $job);
-        $this->workingOn($job);
-
-        $status = 'Processing ' . $job->queue . ' since ' . strftime('%F %T');
-        $this->log($status);
-
-        parent::perform($job);
-
         $this->doneWorking();
+      }
+      else {
+        $job = false;
+        $job = $this->reserve();
+        if(!$job) {
+          usleep(2 * 1000000);
+        }
+        else {
+          $this->log('got ' . $job);
+          $this->workingOn($job);
+          $this->log('Processing ' . $job->queue . ' since ' . strftime('%F %T'));
+          parent::perform($job);
+          $this->doneWorking();
+        }
       }
       $jobs_performed++;
     }
